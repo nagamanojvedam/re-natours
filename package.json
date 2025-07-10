@@ -1,0 +1,21 @@
+{
+  "name": "re-natours",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nagamanojvedam/re-natours.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/nagamanojvedam/re-natours/issues"
+  },
+  "homepage": "https://github.com/nagamanojvedam/re-natours#readme"
+}
