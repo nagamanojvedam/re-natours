@@ -9,6 +9,7 @@ const xss = require('xss-clean');
 const hpp = require('hpp');
 const compression = require('compression');
 const dotenv = require('dotenv');
+const path = require('path');
 
 dotenv.config({ path: './config.env' });
 const AppError = require('./utils/appErrors');
@@ -24,6 +25,7 @@ const reviewRouter = require('./routes/reviewRoutes');
 const bookingController = require('./controllers/bookingController');
 
 const app = express();
+const __dirname = path.resolve();
 // app.enable('trust proxy');
 
 // Defining the view engine
@@ -31,7 +33,9 @@ app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 
 // Global Middleware
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+if (process.env.NODE_ENV !== 'production') {
+  app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+}
 // app.use(helmet());
 app.use(
   '/api',
@@ -70,6 +74,13 @@ app.use(compression());
 
 // Serving Static Files
 app.use(express.static(path.join(__dirname, 'public')));
+
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../frontend/dist')));
+  app.get(/.*?/, (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend', 'dist', 'index.html'));
+  });
+}
 
 app.use('/', viewRouter);
 app.use('/api/v2/tours', tourRouter);
