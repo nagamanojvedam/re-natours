@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNatours } from "../context/ToursContext";
+import { toast } from "react-toastify";
 
 function AccountSettingsForm() {
   const { user, setUser } = useNatours();
@@ -9,34 +10,43 @@ function AccountSettingsForm() {
     email: user.email || "",
     photo: null,
   });
+  const { isLoading, setIsLoading } = useNatours();
   const [previewUrl, setPreviewUrl] = useState(null);
 
   const handleUpdate = async (evnt) => {
     evnt.preventDefault();
 
     console.log("updating user details");
+    try {
+      setIsLoading(true);
 
-    const formData = new FormData();
-    formData.append("name", form.name);
-    formData.append("email", form.email);
-    if (form.photo) formData.append("photo", form.photo);
+      const formData = new FormData();
+      formData.append("name", form.name);
+      formData.append("email", form.email);
+      if (form.photo) formData.append("photo", form.photo);
 
-    const {
-      data: {
-        data: { user },
-      },
-    } = await axios.patch(
-      "http://localhost:5000/api/v2/users/updateMyData",
-      form,
-      {
-        withCredentials: true,
-        headers: {
-          "Content-Type": "multipart/form-data",
+      const {
+        data: {
+          data: { user },
         },
-      }
-    );
+      } = await axios.patch(
+        "http://localhost:5000/api/v2/users/updateMyData",
+        form,
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
-    setUser(user);
+      setUser(user);
+      setIsLoading(false);
+      toast.success("Account Details Updated");
+    } catch (err) {
+      console.error(err);
+      toast.error("Error updating account details");
+    }
   };
 
   return (
@@ -53,6 +63,7 @@ function AccountSettingsForm() {
           onChange={(evnt) => setForm({ ...form, name: evnt.target.value })}
           required
           name="name"
+          disabled={isLoading}
         />
       </div>
       <div className="form__group ma-bt-md">
@@ -67,6 +78,7 @@ function AccountSettingsForm() {
           onChange={(evnt) => setForm({ ...form, email: evnt.target.value })}
           required
           name="email"
+          disabled={isLoading}
         />
       </div>
       <div className="form__group form__photo-upload">
@@ -84,6 +96,7 @@ function AccountSettingsForm() {
           type="file"
           accept="image/*"
           name="photo"
+          disabled={isLoading}
           onChange={(evnt) => {
             setForm({ ...form, photo: evnt.target.files[0] });
             setPreviewUrl(URL.createObjectURL(evnt.target.files[0]));
@@ -94,8 +107,12 @@ function AccountSettingsForm() {
         </label>
       </div>
       <div className="form__group right">
-        <button className="btn btn--small btn--green" type="submit">
-          Save settings
+        <button
+          className="btn btn--small btn--green"
+          type="submit"
+          disabled={isLoading}
+        >
+          {isLoading ? "Updating..." : "Save settings"}
         </button>
       </div>
     </form>

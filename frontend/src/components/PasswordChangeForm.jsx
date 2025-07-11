@@ -1,5 +1,7 @@
 import axios from "axios";
 import { useState } from "react";
+import { useNatours } from "../context/ToursContext";
+import { toast } from "react-toastify";
 
 function PasswordChangeForm() {
   const [passwordForm, setPasswordForm] = useState({
@@ -7,16 +9,29 @@ function PasswordChangeForm() {
     password: "",
     passwordConfirm: "",
   });
-
+  const { isLoading, setIsLoading } = useNatours();
   const handlePasswordChange = async (evnt) => {
     evnt.preventDefault();
 
-    await axios.patch(
-      "http://localhost:5000/api/v2/users/updateMyPassword",
-      passwordForm,
-      { withCredentials: true }
-    );
-    setPasswordForm({ passwordCurrent: "", password: "", passwordConfirm: "" });
+    try {
+      setIsLoading(true);
+      await axios.patch(
+        "http://localhost:5000/api/v2/users/updateMyPassword",
+        passwordForm,
+        { withCredentials: true }
+      );
+      setPasswordForm({
+        passwordCurrent: "",
+        password: "",
+        passwordConfirm: "",
+      });
+      toast.success("Password updated successfully");
+    } catch (err) {
+      console.error(err);
+      toast.error("Error updating password");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -32,6 +47,7 @@ function PasswordChangeForm() {
           placeholder="••••••••"
           required
           minLength="8"
+          disabled={isLoading}
           value={passwordForm.passwordCurrent}
           onChange={(evnt) =>
             setPasswordForm({
@@ -53,6 +69,7 @@ function PasswordChangeForm() {
           required
           minLength="8"
           value={passwordForm.password}
+          disabled={isLoading}
           onChange={(evnt) =>
             setPasswordForm({
               ...passwordForm,
@@ -73,6 +90,7 @@ function PasswordChangeForm() {
           required
           minLength="8"
           value={passwordForm.passwordConfirm}
+          disabled={isLoading}
           onChange={(evnt) =>
             setPasswordForm({
               ...passwordForm,
@@ -85,8 +103,9 @@ function PasswordChangeForm() {
         <button
           className="btn btn--small btn--green btn--save-password"
           type="submit"
+          disabled={isLoading}
         >
-          Save password
+          {isLoading ? "Updating password..." : "Save password"}
         </button>
       </div>
     </form>

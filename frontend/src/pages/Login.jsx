@@ -10,31 +10,35 @@ function Login() {
 
   const from = location.state?.from?.pathname || "/dashboard";
 
-  const { setUser } = useNatours();
+  const { isLoading, setIsLoading, setUser } = useNatours();
   const [formData, setFormData] = useState({ email: "", password: "" });
   const { email, password } = formData;
 
   const handleSubmit = async (evnt) => {
     evnt.preventDefault();
+    try {
+      const {
+        data: {
+          data: { user },
+        },
+      } = await axios("http://localhost:5000/api/v2/users/login", {
+        method: "POST",
+        data: {
+          email,
+          password,
+        },
+        withCredentials: true,
+      });
 
-    const {
-      data: {
-        data: { user },
-      },
-    } = await axios("http://localhost:5000/api/v2/users/login", {
-      method: "POST",
-      data: {
-        email,
-        password,
-      },
-      withCredentials: true,
-    });
+      setUser(user);
+      navigate(from, { replace: true });
 
-    setUser(user);
-    navigate(from, { replace: true });
-
-    setFormData({ email: "", password: "" });
-    toast.success("Login successful!");
+      setFormData({ email: "", password: "" });
+      toast.success("Login successful!");
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response.data.message);
+    }
   };
   return (
     <main className="main">
