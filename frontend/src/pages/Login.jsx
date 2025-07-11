@@ -8,7 +8,7 @@ function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const from = location.state?.from?.pathname || "/dashboard";
+  const from = location.state?.from?.pathname || "/";
 
   const { isLoading, setIsLoading, setUser } = useNatours();
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -17,6 +17,7 @@ function Login() {
   const handleSubmit = async (evnt) => {
     evnt.preventDefault();
     try {
+      setIsLoading(true);
       const {
         data: {
           data: { user },
@@ -38,6 +39,8 @@ function Login() {
     } catch (err) {
       console.error(err);
       toast.error(err.response.data.message);
+    } finally {
+      setIsLoading(false);
     }
   };
   return (
@@ -55,6 +58,7 @@ function Login() {
               type="email"
               placeholder="you@example.com"
               required
+              disabled={isLoading}
               value={email}
               onChange={(evnt) =>
                 setFormData({ ...formData, email: evnt.target.value })
@@ -72,6 +76,7 @@ function Login() {
               placeholder="••••••••"
               required
               minLength="8"
+              disabled={isLoading}
               value={password}
               onChange={(evnt) =>
                 setFormData({ ...formData, password: evnt.target.value })
@@ -79,8 +84,12 @@ function Login() {
             />
           </div>
           <div className="form__group">
-            <button type="submit" className="btn btn--green">
-              Login
+            <button
+              type="submit"
+              className="btn btn--green"
+              disabled={isLoading}
+            >
+              {isLoading ? "Loading..." : "Login"}
             </button>
           </div>
         </form>

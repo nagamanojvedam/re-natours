@@ -17,9 +17,6 @@ createRoot(document.getElementById("root")).render(
         newestOnTop={true}
         closeOnClick
         rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
         toastClassName="toast-container"
         bodyClassName="toast-body"
         progressClassName="toast-progress"

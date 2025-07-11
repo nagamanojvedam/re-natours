@@ -9,6 +9,7 @@ import Account from "./pages/Account";
 import Tour from "./pages/Tour";
 import Overview from "./pages/Overview";
 import Error from "./pages/Error";
+import Bookings from "./pages/Bookings";
 
 function App() {
   return (
@@ -20,14 +21,11 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/tour/:slug" element={<Tour />} />
 
-        <Route
-          path="/me"
-          element={
-            <ProtectedRoute>
-              <Account />
-            </ProtectedRoute>
-          }
-        />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/me" element={<Account />} />
+          <Route path="/bookings" element={<Bookings />} />
+        </Route>
+
         <Route path="*" element={<Error />} />
       </Routes>
       <Footer />

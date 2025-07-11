@@ -10,7 +10,7 @@ function AccountSettingsForm() {
     email: user.email || "",
     photo: null,
   });
-  const { isLoading, setIsLoading } = useNatours();
+  const [isLoading, setIsLoading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
 
   const handleUpdate = async (evnt) => {

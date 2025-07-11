@@ -6,8 +6,7 @@ const NatoursContext = createContext();
 function NatoursProvider({ children }) {
   const [tours, setTours] = useState([]);
   const [reviews, setReviews] = useState([]);
-  const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [user, setUser] = useState(undefined);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -52,9 +51,7 @@ function NatoursProvider({ children }) {
   }, []);
 
   return (
-    <NatoursContext.Provider
-      value={{ tours, reviews, user, isLoading, setUser, setIsLoading }}
-    >
+    <NatoursContext.Provider value={{ tours, reviews, user, setUser }}>
       {children}
     </NatoursContext.Provider>
   );

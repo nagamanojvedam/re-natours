@@ -1,6 +1,5 @@
 import axios from "axios";
 import { useState } from "react";
-import { useNatours } from "../context/ToursContext";
 import { toast } from "react-toastify";
 
 function PasswordChangeForm() {
@@ -9,7 +8,7 @@ function PasswordChangeForm() {
     password: "",
     passwordConfirm: "",
   });
-  const { isLoading, setIsLoading } = useNatours();
+  const [isLoading, setIsLoading] = useState(false);
   const handlePasswordChange = async (evnt) => {
     evnt.preventDefault();
 
@@ -28,7 +27,7 @@ function PasswordChangeForm() {
       toast.success("Password updated successfully");
     } catch (err) {
       console.error(err);
-      toast.error("Error updating password");
+      toast.error(err.response.data.message);
     } finally {
       setIsLoading(false);
     }
