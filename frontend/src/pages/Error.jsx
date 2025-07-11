@@ -1,14 +1,14 @@
 function Error() {
   return (
-    <main class="main">
-      <div class="error">
-        <div class="error__title">
-          <h2 class="heading-secondary heading-secondary--error">
+    <main className="main">
+      <div className="error">
+        <div className="error__title">
+          <h2 className="heading-secondary heading-secondary--error">
             Uh oh! Something went wrong!
           </h2>
-          <h2 class="error__emoji">😢 🤯</h2>
+          <h2 className="error__emoji">😢 🤯</h2>
         </div>
-        <div class="error__msg">
+        <div className="error__msg">
           {/* <!-- Insert the value of msg dynamically here --> */}
         </div>
       </div>

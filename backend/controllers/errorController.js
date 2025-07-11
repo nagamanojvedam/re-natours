@@ -48,7 +48,8 @@ const sendErrorProd = (err, req, res) => {
       });
     }
 
-    return res.status('Error 💥', err).json({
+    console.error('ERROR 💥', err);
+    return res.status(err.statusCode).json({
       status: 'error',
       message: 'Something went wrong',
     });

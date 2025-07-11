@@ -1,8 +1,9 @@
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useNatours } from "../context/ToursContext";
 import OverviewBox from "../components/OverviewBox";
 import { useEffect, useState } from "react";
 import Map from "../components/Map";
+import axios from "axios";
 // import MapTest from "../components/MapTest";
 
 function Tour() {
@@ -25,6 +26,10 @@ function Tour() {
     year: "numeric",
   });
   const paragraphs = tour.description.split("\n");
+
+  const handleBookTour = async () => {
+    await axios.post("http://localhost:5000/webhook-checkout");
+  };
 
   return (
     <>
@@ -191,13 +196,14 @@ function Tour() {
                 className="btn btn--green span-all-rows"
                 id="book-tour"
                 data-tour-id={tour.id}
+                onClick={handleBookTour}
               >
                 Book tour now!
               </button>
             ) : (
-              <a className="btn btn--green span-all-rows" href="/login">
+              <Link className="btn btn--green span-all-rows" to="/login">
                 Log in to book tour!
-              </a>
+              </Link>
             )}
           </div>
         </div>

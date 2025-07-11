@@ -63,8 +63,6 @@ exports.login = catchAsync(async (req, res, next) => {
   if (!user || !(await user.correctPassword(password, user.password)))
     return next(new AppError(401, 'Incorrect email or password'));
 
-  console.log('login', user);
-
   createSendToken(user, 200, req, res);
 });
 
@@ -170,6 +168,7 @@ exports.protect = catchAsync(async (req, res, next) => {
       ),
     );
   }
+
   // Grants access to protected routes
   req.user = currentUser;
   res.locals.user = currentUser;
@@ -190,8 +189,10 @@ exports.restrictTo =
 exports.updatePassword = catchAsync(async (req, res, next) => {
   const user = await User.findById(req.user.id).select('+password');
 
-  if (!(await user.correctPassword(req.body.passwordCurrent, user.password)))
+  if (!(await user.correctPassword(req.body.passwordCurrent, user.password))) {
+    console.log('error from this');
     return next(new AppError(401, 'Your current password is wrong'));
+  }
 
   user.password = req.body.password;
   user.passwordConfirm = req.body.passwordConfirm;

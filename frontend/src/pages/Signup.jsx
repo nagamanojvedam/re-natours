@@ -2,6 +2,7 @@ import axios from "axios";
 import { useState } from "react";
 import { useNatours } from "../context/ToursContext";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 function SignupForm() {
   const { setUser } = useNatours();
@@ -13,28 +14,37 @@ function SignupForm() {
     password: "",
     passwordConfirm: "",
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   const { name, email, password, passwordConfirm } = details;
 
   const handleSubmit = async (evnt) => {
     evnt.preventDefault();
 
-    const {
-      data: { data: user },
-    } = await axios("http://localhost:5000/api/v2/users/signup", {
-      method: "POST",
-      data: {
-        name,
-        email,
-        password,
-        passwordConfirm,
-      },
-      withCredentials: true,
-    });
-
-    console.log(user);
-    setUser(user);
-    navigate("/");
+    try {
+      setIsLoading(true);
+      const {
+        data: {
+          data: { user },
+        },
+      } = await axios("http://localhost:5000/api/v2/users/signup", {
+        method: "POST",
+        data: {
+          name,
+          email,
+          password,
+          passwordConfirm,
+        },
+        withCredentials: true,
+      });
+      setIsLoading(false);
+      setUser(user);
+      navigate("/");
+      toast.success("Signup successful!");
+    } catch (err) {
+      setIsLoading(false);
+      toast.error(err.response.data.message);
+    }
   };
 
   return (
@@ -52,6 +62,7 @@ function SignupForm() {
               type="text"
               placeholder="Your name"
               required
+              disabled={isLoading}
               value={name}
               onChange={(e) => setDetails({ ...details, name: e.target.value })}
             />
@@ -67,6 +78,7 @@ function SignupForm() {
               type="email"
               placeholder="Your email"
               required
+              disabled={isLoading}
               value={email}
               onChange={(e) =>
                 setDetails({ ...details, email: e.target.value })
@@ -84,6 +96,7 @@ function SignupForm() {
               type="password"
               placeholder="••••••••"
               required
+              disabled={isLoading}
               minLength={8}
               value={password}
               onChange={(e) =>
@@ -102,6 +115,7 @@ function SignupForm() {
               type="password"
               placeholder="••••••••"
               required
+              disabled={isLoading}
               minLength={8}
               value={passwordConfirm}
               onChange={(e) =>
@@ -111,8 +125,12 @@ function SignupForm() {
           </div>
 
           <div className="form__group">
-            <button type="submit" className="btn btn--green">
-              Signup
+            <button
+              type="submit"
+              className="btn btn--green"
+              disabled={isLoading}
+            >
+              {!isLoading ? "Signup" : "Signing up..."}
             </button>
           </div>
         </form>

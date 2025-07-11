@@ -940,19 +940,16 @@ body {
   gap: 2rem;
 }
 
-.nav__user-name {
-  height: 50px;
-  width: 50px;
+.nav__user-avatar {
+  cursor: pointer;
+  height: 4.5rem;
+  width: 4.5rem;
   border-radius: 50%;
-  color: #777;
-  font-weight: 700;
-  font-size: 1.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.125rem;
-  background-color: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  margin-right: 1.5rem;
+}
+
+.nav__user-avatar:hover {
+  opacity: 0.8;
 }
 
 .nav__el--cta {
@@ -1344,4 +1341,24 @@ body {
   box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.15);
   -webkit-transform: translateY(-2px);
   transform: translateY(-2px);
+}
+
+.toast-container {
+  background-color: #111827; /* dark gray */
+  color: #f9fafb;
+  font-family: "Inter", sans-serif;
+  font-size: 16px;
+}
+
+.toast-body {
+  padding: 10px;
+  font-weight: 500;
+}
+
+.toast-progress {
+  background-color: #22c55e; /* green */
+}
+
+.toast-error {
+  background-color: #ef4444; /* red */
 }

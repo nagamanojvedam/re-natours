@@ -1,20 +1,26 @@
 import axios from "axios";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useNatours } from "../context/ToursContext";
+import { toast } from "react-toastify";
 
 function Login() {
-  const { setUser } = useNatours();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const from = location.state?.from?.pathname || "/dashboard";
+
+  const { setUser } = useNatours();
   const [formData, setFormData] = useState({ email: "", password: "" });
   const { email, password } = formData;
 
   const handleSubmit = async (evnt) => {
     evnt.preventDefault();
-    console.log(formData);
 
     const {
-      data: { user },
+      data: {
+        data: { user },
+      },
     } = await axios("http://localhost:5000/api/v2/users/login", {
       method: "POST",
       data: {
@@ -25,7 +31,10 @@ function Login() {
     });
 
     setUser(user);
-    navigate("/");
+    navigate(from, { replace: true });
+
+    setFormData({ email: "", password: "" });
+    toast.success("Login successful!");
   };
   return (
     <main className="main">

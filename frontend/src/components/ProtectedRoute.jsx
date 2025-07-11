@@ -1,17 +1,17 @@
-import { useEffect } from "react";
-import { useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useNatours } from "../context/ToursContext";
 
 function ProtectedRoute({ children }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { user } = useNatours();
+  const location = useLocation();
 
-  useEffect(() => {
-    if (user) setIsAuthenticated(true);
-  }, [user]);
+  if (user === undefined) return null;
 
-  return isAuthenticated ? children : <Navigate to="/login" replace />;
+  return user ? (
+    children
+  ) : (
+    <Navigate to="/login" replace state={{ from: location }} />
+  );
 }
 
 export default ProtectedRoute;

@@ -1,9 +1,11 @@
-import { Link } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useNatours } from "../context/ToursContext";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 function Header() {
   const { user, setUser } = useNatours();
+  const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
@@ -11,6 +13,7 @@ function Header() {
         withCredentials: true,
       });
       setUser(null);
+      toast.success("Logout successful!");
     } catch (err) {
       console.error("Error logging out", err);
     }
@@ -29,17 +32,21 @@ function Header() {
       </div>
       <nav className="nav nav--user">
         {user ? (
-          <div className="nav__container">
-            <p className="nav__user-name">{user.name.split(" ")[0].at(0)}</p>
-            <Link className="nav__el nav__el--cta" to="/login">
+          <div className="nav__container" onClick={() => navigate("/me")}>
+            <img
+              className="nav__user-avatar"
+              src={`http://localhost:5000/img/users/${user?.photo}`}
+              alt={`${user?.name || "User"}'s photo`}
+            />
+            <button className="nav__el nav__el--cta" onClick={handleLogout}>
               Log out
-            </Link>
+            </button>
           </div>
         ) : (
           <>
-            <button className="nav__el" onClick={handleLogout}>
+            <Link className="nav__el" to="/login">
               Log in
-            </button>
+            </Link>
             <Link className="nav__el nav__el--cta" to="/signup">
               Sign up{" "}
             </Link>

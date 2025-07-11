@@ -16,7 +16,6 @@ function NatoursProvider({ children }) {
         } = await axios.get("http://localhost:5000/api/v2/users/check", {
           withCredentials: true,
         });
-        console.log("login user", user);
         setUser(user);
       } catch (err) {
         console.error("Error fetching user", err);
