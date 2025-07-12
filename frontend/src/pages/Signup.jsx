@@ -44,6 +44,7 @@ function SignupForm() {
       toast.success("Signup successful!");
     } catch (err) {
       setIsLoading(false);
+      console.error(err);
       toast.error(err.response.data.message);
     }
   };

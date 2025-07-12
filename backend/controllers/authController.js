@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appErrors');
-const Email = require('../utils/email');
+// const Email = require('../utils/email');
 
 const User = require('../models/userModel');
 
@@ -47,7 +47,7 @@ exports.signup = catchAsync(async (req, res, next) => {
   const newUser = await User.create(req.body);
   const url = `${req.protocol}://${req.get('host')}/me`;
 
-  await new Email(newUser, url).sendWelcome();
+  // await new Email(newUser, url).sendWelcome();
 
   createSendToken(newUser, 201, req, res);
 });
@@ -92,7 +92,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   try {
     const resetUrl = `${req.protocol}://${req.get('host')}/api/v2/users/resetPassword/${resetToken}`;
 
-    await new Email(user, resetUrl).sendPasswordReset();
+    // await new Email(user, resetUrl).sendPasswordReset();
 
     res.status(200).json({
       status: 'success',

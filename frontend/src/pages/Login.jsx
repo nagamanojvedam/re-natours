@@ -10,7 +10,8 @@ function Login() {
 
   const from = location.state?.from?.pathname || "/";
 
-  const { isLoading, setIsLoading, setUser } = useNatours();
+  const { setUser } = useNatours();
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({ email: "", password: "" });
   const { email, password } = formData;
 
