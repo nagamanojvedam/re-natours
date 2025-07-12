@@ -3,6 +3,9 @@ import { useNatours } from "../context/ToursContext";
 import axios from "axios";
 import { toast } from "react-toastify";
 
+const baseURL =
+  import.meta.env.MODE === "development" ? "http://localhost:5000/" : "/";
+
 function Header() {
   const { user, setUser } = useNatours();
   const navigate = useNavigate();
@@ -36,7 +39,7 @@ function Header() {
           <div className="nav__container" onClick={() => navigate("/me")}>
             <img
               className="nav__user-avatar"
-              src={`http://localhost:5000/img/users/${user?.photo}`}
+              src={`${baseURL}img/users/${user?.photo}`}
               alt={`${user?.name || "User"}'s photo`}
             />
             <button className="nav__el nav__el--cta" onClick={handleLogout}>

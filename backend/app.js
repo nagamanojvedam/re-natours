@@ -24,12 +24,12 @@ const reviewRouter = require('./routes/reviewRoutes');
 const bookingController = require('./controllers/bookingController');
 
 const app = express();
-const __dirname = path.resolve();
+// const __dirname = path.resolve();
 // app.enable('trust proxy');
 
 // Defining the view engine
-app.set('view engine', 'pug');
-app.set('views', path.join(__dirname, 'views'));
+// app.set('view engine', 'pug');
+// app.set('views', path.join(__dirname, 'views'));
 
 // Global Middleware
 if (process.env.NODE_ENV !== 'production') {
@@ -72,16 +72,9 @@ app.use(
 app.use(compression());
 
 // Serving Static Files
-app.use(express.static(path.join(__dirname, 'public')));
+// app.use(express.static(path.join(__dirname, 'public')));
 
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../frontend/dist')));
-  app.get(/.*?/, (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend', 'dist', 'index.html'));
-  });
-}
-
-app.use('/', viewRouter);
+// app.use('/', viewRouter);
 app.use('/api/v2/tours', tourRouter);
 app.use('/api/v2/users', userRouter);
 app.use('/api/v2/bookings', bookingRouter);
@@ -90,6 +83,13 @@ app.use('/api/v2/reviews', reviewRouter);
 app.get('/config/stripe', (req, res) => {
   res.json({ publicKey: process.env.STRIPE_PK });
 });
+
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../frontend/dist')));
+  app.get(/.*?/, (req, res, next) => {
+    res.sendFile(path.join(__dirname, '../frontend', 'dist', 'index.html'));
+  });
+}
 
 app.all('*', (req, res, next) => {
   next(new AppError(404, `Cant find ${req.originalUrl} on this server!`));

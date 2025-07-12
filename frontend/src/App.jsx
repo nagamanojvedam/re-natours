@@ -1,4 +1,5 @@
 import { Routes, Route } from "react-router-dom";
+import axios from "axios";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -10,6 +11,9 @@ import Tour from "./pages/Tour";
 import Overview from "./pages/Overview";
 import Error from "./pages/Error";
 import Bookings from "./pages/Bookings";
+
+axios.defaults.baseURL =
+  import.meta.env.MODE === "development" ? "http://localhost:5000" : "/";
 
 function App() {
   return (

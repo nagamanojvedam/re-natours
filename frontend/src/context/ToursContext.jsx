@@ -44,6 +44,7 @@ function NatoursProvider({ children }) {
           },
           // } = await axios.get("http://localhost:5000/api/v2/reviews");
         } = await axios.get("/api/v2/reviews");
+        console.log(reviews);
         setReviews(reviews);
       } catch (err) {
         console.error("Error fetching reviews", err);
