@@ -2,53 +2,51 @@ import { useEffect, useRef } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
-export default function Map({ locations }) {
+export default function Map({ locations = [] }) {
   const mapContainer = useRef(null);
   const mapRef = useRef(null);
 
   useEffect(() => {
     if (!mapContainer.current || mapRef.current) return;
-    // if (mapRef.current) return;
 
     const map = new maplibregl.Map({
       container: mapContainer.current,
-
-      style: `https://api.maptiler.com/maps/basic-v2/style.json?key=PhnTkAHukY3eCHps7II9`,
-
-      center: [39.753, 35.6844], // initial center required
+      style:
+        "https://api.maptiler.com/maps/basic-v2/style.json?key=PhnTkAHukY3eCHps7II9",
+      center: [39.753, 35.6844], // fallback initial center
       zoom: 12,
     });
 
-    map.scrollZoom.disable(); // disable scroll zoom explicitly
+    map.scrollZoom.disable(); // disable scroll zoom
     mapRef.current = map;
 
     const bounds = new maplibregl.LngLatBounds();
 
-    locations.forEach((location) => {
+    locations.forEach(({ coordinates, day, description }) => {
+      // Marker
       const el = document.createElement("div");
       el.className = "marker";
 
-      new maplibregl.Marker({
-        element: el,
-        anchor: "bottom",
-      })
-        .setLngLat(location.coordinates)
+      new maplibregl.Marker({ element: el, anchor: "bottom" })
+        .setLngLat(coordinates)
         .addTo(map);
 
+      // Popup
       new maplibregl.Popup({ offset: 40 })
-        .setLngLat(location.coordinates)
-        .setHTML(`<p>Day ${location.day}: ${location.description}</p>`)
+        .setLngLat(coordinates)
+        .setHTML(`<p>Day ${day}: ${description}</p>`)
         .addTo(map);
 
-      bounds.extend(location.coordinates);
+      bounds.extend(coordinates);
     });
 
     map.fitBounds(bounds, {
       padding: { top: 200, bottom: 150, left: 100, right: 100 },
       maxZoom: 10,
+      duration: 1000,
     });
 
-    return () => map.remove(); // Clean up on unmount
+    return () => map.remove(); // Clean up
   }, [locations]);
 
   return (

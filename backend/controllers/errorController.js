@@ -1,45 +1,54 @@
 const AppError = require('../utils/appErrors');
 
-const handleCastErrorDB = (error) =>
-  new AppError(400, `Invalid ${error.path}: ${error.value}`);
+// Handle Mongoose CastError (invalid MongoDB ObjectId, etc.)
+const handleCastErrorDB = (err) =>
+  new AppError(400, `Invalid ${err.path}: ${err.value}`);
 
-const handleDuplicateFieldsDB = (error) => {
-  const value = error.message.match(/(["'])(\\?.)*?\1/)[0];
-
+// Handle duplicate field error from MongoDB
+const handleDuplicateFieldsDB = (err) => {
+  const value = err.message.match(/(["'])(\\?.)*?\1/)[0];
   return new AppError(
     400,
-    `Duplicate field value: { tour: ${value} }. Please use another value!`,
+    `Duplicate field value: ${value}. Please use another value!`,
   );
 };
-const handleValidationErrorDB = (error) => {
-  const errors = Object.values(error.errors).map((el) => el.message);
 
+// Handle Mongoose validation errors
+const handleValidationErrorDB = (err) => {
+  const errors = Object.values(err.errors).map((el) => el.message);
   return new AppError(400, `Invalid input data. ${errors.join('. ')}`);
 };
+
+// Handle JWT error (invalid signature)
 const handleJWTError = () =>
-  new AppError(401, 'Invalid token. Please log in again');
+  new AppError(401, 'Invalid token. Please log in again.');
 
+// Handle JWT expired token
 const handleJWTExpiredError = () =>
-  new AppError(401, 'Your token has expired, please login again');
+  new AppError(401, 'Your token has expired. Please log in again.');
 
+// Development error response (more details)
 const sendErrorDev = (err, req, res) => {
   // For API
-  if (req.originalUrl.startsWith('/api'))
+  if (req.originalUrl.startsWith('/api')) {
     return res.status(err.statusCode).json({
       status: err.status,
       error: err,
       message: err.message,
       stack: err.stack,
     });
+  }
 
-  // For Frontend
-  return res
-    .status(err.statusCode)
-    .render('error', { title: 'Something went wrong!', msg: err.message });
+  // For rendered website
+  return res.status(err.statusCode).render('error', {
+    title: 'Something went wrong!',
+    msg: err.message,
+  });
 };
 
+// Production error response (hide internal details)
 const sendErrorProd = (err, req, res) => {
-  // For Api
+  // For API
   if (req.originalUrl.startsWith('/api')) {
     if (err.isOperationalError) {
       return res.status(err.statusCode).json({
@@ -48,37 +57,49 @@ const sendErrorProd = (err, req, res) => {
       });
     }
 
+    // Programming/unknown error: don't leak details
     console.error('ERROR 💥', err);
-    return res.status(err.statusCode).json({
+    return res.status(500).json({
       status: 'error',
-      message: 'Something went wrong',
+      message: 'Something went wrong!',
     });
   }
 
-  // For Frontend
+  // For rendered website
   if (err.isOperationalError) {
     return res.status(err.statusCode).render('error', {
-      title: 'Please try again later',
-      msg: `${err.message}`,
+      title: 'Something went wrong!',
+      msg: err.message,
     });
   }
 
+  // Programming/unknown error
+  console.error('ERROR 💥', err);
   return res.status(err.statusCode).render('error', {
-    title: 'Something went wrong',
-    msg: 'Please try again later',
+    title: 'Something went wrong!',
+    msg: 'Please try again later.',
   });
 };
 
+// GLOBAL ERROR MIDDLEWARE FUNCTION
 module.exports = (err, req, res, next) => {
+  // Default error values
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
 
-  if (process.env.NODE_ENV === 'development') sendErrorDev(err, req, res);
+  // Development environment
+  if (process.env.NODE_ENV === 'development') {
+    sendErrorDev(err, req, res);
+  }
 
-  if (process.env.NODE_ENV === 'production') {
+  // Production environment
+  else if (process.env.NODE_ENV === 'production') {
     let error = { ...err };
+
+    // Manually copy message for Mongo/mongoose errors
     error.message = err.message;
 
+    // Handle specific error types
     if (error.name === 'CastError') error = handleCastErrorDB(error);
     if (error.code === 11000) error = handleDuplicateFieldsDB(error);
     if (error.name === 'ValidationError')

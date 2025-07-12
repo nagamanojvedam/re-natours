@@ -1,4 +1,10 @@
+import { useLocation } from "react-router-dom";
+
 function Error() {
+  const location = useLocation();
+  const message =
+    location.state?.message || "Something went wrong. Please try again later.";
+
   return (
     <main className="main">
       <div className="error">
@@ -9,7 +15,7 @@ function Error() {
           <h2 className="error__emoji">😢 🤯</h2>
         </div>
         <div className="error__msg">
-          {/* <!-- Insert the value of msg dynamically here --> */}
+          <p>{message}</p>
         </div>
       </div>
     </main>

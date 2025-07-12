@@ -8,27 +8,33 @@ function PasswordChangeForm() {
     password: "",
     passwordConfirm: "",
   });
+
   const [isLoading, setIsLoading] = useState(false);
-  const handlePasswordChange = async (evnt) => {
-    evnt.preventDefault();
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
 
     try {
       setIsLoading(true);
-      await axios.patch(
-        // "http://localhost:5000/api/v2/users/updateMyPassword",
-        "/api/v2/users/updateMyPassword",
-        passwordForm,
-        { withCredentials: true }
-      );
+
+      await axios.patch("/api/v2/users/updateMyPassword", passwordForm, {
+        withCredentials: true,
+      });
+
+      toast.success("Password updated successfully");
       setPasswordForm({
         passwordCurrent: "",
         password: "",
         passwordConfirm: "",
       });
-      toast.success("Password updated successfully");
     } catch (err) {
       console.error(err);
-      toast.error(err.response.data.message);
+      toast.error(err?.response?.data?.message || "Failed to update password");
     } finally {
       setIsLoading(false);
     }
@@ -42,63 +48,54 @@ function PasswordChangeForm() {
         </label>
         <input
           id="password-current"
+          name="passwordCurrent"
           className="form__input"
           type="password"
           placeholder="••••••••"
           required
-          minLength="8"
+          minLength={8}
           disabled={isLoading}
           value={passwordForm.passwordCurrent}
-          onChange={(evnt) =>
-            setPasswordForm({
-              ...passwordForm,
-              passwordCurrent: evnt.target.value,
-            })
-          }
+          onChange={handleChange}
         />
       </div>
+
       <div className="form__group">
         <label className="form__label" htmlFor="password">
           New password
         </label>
         <input
           id="password"
+          name="password"
           className="form__input"
           type="password"
           placeholder="••••••••"
           required
-          minLength="8"
-          value={passwordForm.password}
+          minLength={8}
           disabled={isLoading}
-          onChange={(evnt) =>
-            setPasswordForm({
-              ...passwordForm,
-              password: evnt.target.value,
-            })
-          }
+          value={passwordForm.password}
+          onChange={handleChange}
         />
       </div>
+
       <div className="form__group ma-bt-lg">
         <label className="form__label" htmlFor="password-confirm">
           Confirm password
         </label>
         <input
           id="password-confirm"
+          name="passwordConfirm"
           className="form__input"
           type="password"
           placeholder="••••••••"
           required
-          minLength="8"
-          value={passwordForm.passwordConfirm}
+          minLength={8}
           disabled={isLoading}
-          onChange={(evnt) =>
-            setPasswordForm({
-              ...passwordForm,
-              passwordConfirm: evnt.target.value,
-            })
-          }
+          value={passwordForm.passwordConfirm}
+          onChange={handleChange}
         />
       </div>
+
       <div className="form__group right">
         <button
           className="btn btn--small btn--green btn--save-password"

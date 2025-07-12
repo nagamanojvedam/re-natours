@@ -16,10 +16,19 @@ function SignupForm() {
   });
   const [isLoading, setIsLoading] = useState(false);
 
-  const { name, email, password, passwordConfirm } = details;
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setDetails((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = async (evnt) => {
     evnt.preventDefault();
+    const { name, email, password, passwordConfirm } = details;
+
+    if (password !== passwordConfirm) {
+      toast.error("Passwords do not match");
+      return;
+    }
 
     try {
       setIsLoading(true);
@@ -27,25 +36,20 @@ function SignupForm() {
         data: {
           data: { user },
         },
-        // } = await axios("http://localhost:5000/api/v2/users/signup", {
       } = await axios("/api/v2/users/signup", {
         method: "POST",
-        data: {
-          name,
-          email,
-          password,
-          passwordConfirm,
-        },
+        data: { name, email, password, passwordConfirm },
         withCredentials: true,
       });
-      setIsLoading(false);
+
       setUser(user);
       navigate("/");
       toast.success("Signup successful!");
     } catch (err) {
+      const errorMsg = err?.response?.data?.message || "Signup failed";
+      toast.error(errorMsg);
+    } finally {
       setIsLoading(false);
-      console.error(err);
-      toast.error(err.response.data.message);
     }
   };
 
@@ -60,13 +64,14 @@ function SignupForm() {
             </label>
             <input
               id="name"
+              name="name"
               className="form__input"
               type="text"
               placeholder="Your name"
               required
               disabled={isLoading}
-              value={name}
-              onChange={(e) => setDetails({ ...details, name: e.target.value })}
+              value={details.name}
+              onChange={handleChange}
             />
           </div>
 
@@ -76,15 +81,14 @@ function SignupForm() {
             </label>
             <input
               id="email"
+              name="email"
               className="form__input"
               type="email"
               placeholder="Your email"
               required
               disabled={isLoading}
-              value={email}
-              onChange={(e) =>
-                setDetails({ ...details, email: e.target.value })
-              }
+              value={details.email}
+              onChange={handleChange}
             />
           </div>
 
@@ -94,35 +98,33 @@ function SignupForm() {
             </label>
             <input
               id="password"
+              name="password"
               className="form__input"
               type="password"
               placeholder="••••••••"
               required
-              disabled={isLoading}
               minLength={8}
-              value={password}
-              onChange={(e) =>
-                setDetails({ ...details, password: e.target.value })
-              }
+              disabled={isLoading}
+              value={details.password}
+              onChange={handleChange}
             />
           </div>
 
           <div className="form__group ma-bt-md">
             <label className="form__label" htmlFor="passwordConfirm">
-              Password Confirm
+              Confirm Password
             </label>
             <input
               id="passwordConfirm"
+              name="passwordConfirm"
               className="form__input"
               type="password"
               placeholder="••••••••"
               required
-              disabled={isLoading}
               minLength={8}
-              value={passwordConfirm}
-              onChange={(e) =>
-                setDetails({ ...details, passwordConfirm: e.target.value })
-              }
+              disabled={isLoading}
+              value={details.passwordConfirm}
+              onChange={handleChange}
             />
           </div>
 
@@ -132,7 +134,7 @@ function SignupForm() {
               className="btn btn--green"
               disabled={isLoading}
             >
-              {!isLoading ? "Signup" : "Signing up..."}
+              {isLoading ? "Signing up..." : "Signup"}
             </button>
           </div>
         </form>

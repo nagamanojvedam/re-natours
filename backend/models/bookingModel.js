@@ -10,15 +10,15 @@ const bookingSchema = new mongoose.Schema(
     user: {
       type: mongoose.Schema.ObjectId,
       ref: 'User',
-      required: [true, 'Booking must belog to a user'],
+      required: [true, 'Booking must belong to a user'],
     },
     price: {
       type: Number,
-      required: [true, 'Booking myst have a price'],
+      required: [true, 'Booking must have a price'],
     },
     createdAt: {
       type: Date,
-      default: Date.now(),
+      default: Date.now,
     },
     paid: {
       type: Boolean,
@@ -26,14 +26,21 @@ const bookingSchema = new mongoose.Schema(
     },
   },
   {
-    toObject: { virtuals: true },
     toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   },
 );
 
+/**
+ * Automatically populate tour and user details in all find queries.
+ */
 bookingSchema.pre(/^find/, function (next) {
-  this.populate('user').populate({ path: 'tour', select: 'name' });
+  this.populate('user').populate({
+    path: 'tour',
+    select: 'name',
+  });
   next();
 });
 
-module.exports = mongoose.model('Booking', bookingSchema);
+const Booking = mongoose.model('Booking', bookingSchema);
+module.exports = Booking;

@@ -4,29 +4,29 @@ function Footer() {
   return (
     <footer className="footer">
       <div className="footer__logo">
-        {" "}
         <img src="/img/logo-green.png" alt="Natour logo" />
       </div>
       <ul className="footer__nav">
         <li>
-          <Link href="#">About us</Link>
+          <Link to="/about">About us</Link>
         </li>
         <li>
-          <Link href="#">Download apps</Link>
+          <Link to="/download">Download apps</Link>
         </li>
         <li>
-          <Link href="#">Become Link guide</Link>
+          <Link to="/guide">Become a guide</Link>
         </li>
         <li>
-          <Link href="#">Careers</Link>
+          <Link to="/careers">Careers</Link>
         </li>
         <li>
-          <Link href="#">Contact</Link>
+          <Link to="/contact">Contact</Link>
         </li>
       </ul>
       <p className="footer__copyright">
         &copy; by Jonas Schmedtmann. Feel free to use this project for your own
-        purposes, EXCEPT producing your own course or tutorials.
+        purposes, <strong>EXCEPT</strong> producing your own course or
+        tutorials.
       </p>
     </footer>
   );

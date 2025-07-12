@@ -9,7 +9,7 @@ const tourSchema = new mongoose.Schema(
       unique: true,
       trim: true,
       maxlength: [40, 'A tour name must have less or equal to 40 characters'],
-      minlength: [10, 'A tour name must have atleast 10 characters'],
+      minlength: [10, 'A tour name must have at least 10 characters'],
     },
     duration: {
       type: Number,
@@ -24,14 +24,15 @@ const tourSchema = new mongoose.Schema(
       required: [true, 'A tour must have a difficulty'],
       enum: {
         values: ['easy', 'medium', 'difficult'],
-        message: 'Difficulty is either: easy, medium or difficult',
+        message: 'Difficulty must be either: easy, medium, or difficult',
       },
     },
     ratingsAverage: {
       type: Number,
       default: 2.5,
-      max: [5, 'A tour should have a maximum rating of 5'],
-      min: [1, 'A tour should have a minimum rating of 1'],
+      min: [1, 'Rating must be above 1.0'],
+      max: [5, 'Rating must be below 5.0'],
+      set: (val) => Math.round(val * 10) / 10, // 3.6666 => 37 => 3.7
     },
     ratingsQuantity: {
       type: Number,
@@ -46,15 +47,15 @@ const tourSchema = new mongoose.Schema(
       default: 0,
       validate: {
         validator: function (val) {
-          return this.price > val;
+          return val < this.price;
         },
-        message: 'Discount: {VALUE} should be less than the tour price',
+        message: 'Discount ({VALUE}) should be less than the regular price',
       },
     },
     summary: {
       type: String,
       trim: true,
-      required: [true, 'A tour must have a description'],
+      required: [true, 'A tour must have a summary'],
     },
     description: {
       type: String,
@@ -62,14 +63,12 @@ const tourSchema = new mongoose.Schema(
     },
     imageCover: {
       type: String,
-      required: [true, 'A tour must have an image cover'],
+      required: [true, 'A tour must have a cover image'],
     },
-    images: {
-      type: [String],
-    },
+    images: [String],
     createdAt: {
       type: Date,
-      default: Date.now(),
+      default: Date.now,
       select: false,
     },
     startDates: [Date],
@@ -79,6 +78,7 @@ const tourSchema = new mongoose.Schema(
       default: false,
     },
     startLocation: {
+      // GeoJSON format
       type: {
         type: String,
         default: 'Point',
@@ -114,50 +114,59 @@ const tourSchema = new mongoose.Schema(
   },
 );
 
-// indexes
+// -----------------------------------
+// Indexes for performance
+// -----------------------------------
 tourSchema.index({ price: 1, ratingsAverage: -1 });
 tourSchema.index({ slug: 1 });
 tourSchema.index({ startLocation: '2dsphere' });
 
-// virtual populate
+// -----------------------------------
+// Virtual fields (not stored in DB)
+// -----------------------------------
+tourSchema.virtual('durationWeeks').get(function () {
+  return this.duration / 7;
+});
+
 tourSchema.virtual('reviews', {
   ref: 'Review',
   localField: '_id',
   foreignField: 'tour',
 });
 
-tourSchema.virtual('user', {
-  ref: 'Review',
-  localField: '_id',
-  foreignField: 'user',
-});
-
-tourSchema.virtual('durationWeeks').get(function () {
-  return this.duration / 7;
-});
-
-// pre run document middleware
+// -----------------------------------
+// DOCUMENT Middleware (before save)
+// -----------------------------------
 tourSchema.pre('save', function (next) {
   this.slug = slugify(this.name, { lower: true });
   next();
 });
 
-// pre run query middleware
+// -----------------------------------
+// QUERY Middleware
+// -----------------------------------
+
+// Hide secret tours from all find queries
 tourSchema.pre(/^find/, function (next) {
   this.find({ secretTour: { $ne: true } });
-  this.start = Date.now();
+  this.start = Date.now(); // for logging duration
   next();
 });
 
+// Populate guides on find
 tourSchema.pre(/^find/, function (next) {
-  this.populate({ path: 'guides', select: '-__v --passwordChangedAt' });
+  this.populate({
+    path: 'guides',
+    select: '-__v -passwordChangedAt',
+  });
   next();
 });
 
-// post run query middleware
-tourSchema.post(/^find/, function (doc, next) {
-  console.log(`${Date.now() - this.start} milliseconds`);
+// Log query execution time
+tourSchema.post(/^find/, function (docs, next) {
+  console.log(`Query took ${Date.now() - this.start} ms`);
   next();
 });
 
-module.exports = mongoose.model('Tour', tourSchema);
+const Tour = mongoose.model('Tour', tourSchema);
+module.exports = Tour;

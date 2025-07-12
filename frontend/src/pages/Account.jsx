@@ -5,25 +5,38 @@ import { useNatours } from "../context/ToursContext";
 
 function Account() {
   const { user } = useNatours();
+
+  const navItems = [
+    { link: "#", text: "Settings", icon: "settings", active: true },
+    { link: "/bookings", text: "My Bookings", icon: "briefcase" },
+    { link: "#", text: "My Reviews", icon: "star" },
+    { link: "#", text: "Billing", icon: "credit-card" },
+  ];
+
+  const adminItems = [
+    { link: "#", text: "Manage tours", icon: "map" },
+    { link: "#", text: "Manage users", icon: "users" },
+    { link: "#", text: "Manage reviews", icon: "star" },
+    { link: "#", text: "Manage bookings", icon: "briefcase" },
+  ];
+
   return (
     <main className="main">
       <div className="user-view">
         <nav className="user-view__menu">
           <ul className="side-nav">
-            <NavItem link="#" text="Settings" icon="settings" active />
-            <NavItem link="/bookings" text="My Bookings" icon="briefcase" />
-            <NavItem link="#" text="My Reviews" icon="star" />
-            <NavItem link="#" text="Billing" icon="credit-card" />
+            {navItems.map((item, idx) => (
+              <NavItem key={idx} {...item} />
+            ))}
           </ul>
 
           {user?.role === "admin" && (
             <div className="admin-nav">
               <h5 className="admin-nav__heading">Admin</h5>
               <ul className="side-nav">
-                <NavItem link="#" text="Manage tours" icon="map" />
-                <NavItem link="#" text="Manage users" icon="users" />
-                <NavItem link="#" text="Manage reviews" icon="star" />
-                <NavItem link="#" text="Manage bookings" icon="briefcase" />
+                {adminItems.map((item, idx) => (
+                  <NavItem key={`admin-${idx}`} {...item} />
+                ))}
               </ul>
             </div>
           )}

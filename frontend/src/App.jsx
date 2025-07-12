@@ -1,39 +1,46 @@
-import { Routes, Route } from "react-router-dom";
+// src/App.jsx
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { Suspense, lazy } from "react";
 import axios from "axios";
-import Header from "./components/Header";
-import Footer from "./components/Footer";
-import ProtectedRoute from "./components/ProtectedRoute";
 
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import Account from "./pages/Account";
-import Tour from "./pages/Tour";
-import Overview from "./pages/Overview";
-import Error from "./pages/Error";
-import Bookings from "./pages/Bookings";
+import Layout from "./components/Layout";
+import ProtectedRoute from "./components/ProtectedRoute";
+import LoadingSpinner from "./components/LoadingSpinner";
+
+// Pages (lazy-loaded)
+const Login = lazy(() => import("./pages/Login"));
+const Signup = lazy(() => import("./pages/Signup"));
+const Account = lazy(() => import("./pages/Account"));
+const Tour = lazy(() => import("./pages/Tour"));
+const Overview = lazy(() => import("./pages/Overview"));
+const Error = lazy(() => import("./pages/Error"));
+const Bookings = lazy(() => import("./pages/Bookings"));
 
 axios.defaults.baseURL =
   import.meta.env.MODE === "development" ? "http://localhost:5000" : "/";
 
 function App() {
+  const location = useLocation();
+
   return (
-    <div>
-      <Header />
-      <Routes>
-        <Route index element={<Overview />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/tour/:slug" element={<Tour />} />
+    <Layout>
+      <Suspense fallback={<LoadingSpinner />}>
+        <Routes>
+          <Route index element={<Overview />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/tour/:slug" element={<Tour />} />
 
-        <Route element={<ProtectedRoute />}>
-          <Route path="/me" element={<Account />} />
-          <Route path="/bookings" element={<Bookings />} />
-        </Route>
+          <Route element={<ProtectedRoute />}>
+            <Route path="/me" element={<Account />} />
+            <Route path="/bookings" element={<Bookings />} />
+          </Route>
 
-        <Route path="*" element={<Error />} />
-      </Routes>
-      <Footer />
-    </div>
+          {/* 404 */}
+          <Route path="*" element={<Error path={location.pathname} />} />
+        </Routes>
+      </Suspense>
+    </Layout>
   );
 }
 

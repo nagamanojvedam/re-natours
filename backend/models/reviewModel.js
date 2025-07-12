@@ -1,15 +1,11 @@
 const mongoose = require('mongoose');
-
 const Tour = require('./tourModel');
 
 const reviewSchema = new mongoose.Schema(
   {
     review: {
       type: String,
-      required: [
-        true,
-        'A review should have a description and cannot be empty',
-      ],
+      required: [true, 'A review must contain text.'],
     },
     rating: {
       type: Number,
@@ -19,17 +15,17 @@ const reviewSchema = new mongoose.Schema(
     },
     createdAt: {
       type: Date,
-      default: Date.now(),
+      default: Date.now,
     },
     tour: {
       type: mongoose.Schema.ObjectId,
       ref: 'Tour',
-      required: [true, 'A review must belong to a tour'],
+      required: [true, 'A review must be associated with a tour.'],
     },
     user: {
       type: mongoose.Schema.ObjectId,
       ref: 'User',
-      required: [true, 'A review must belong to a user'],
+      required: [true, 'A review must be written by a user.'],
     },
   },
   {
@@ -38,6 +34,25 @@ const reviewSchema = new mongoose.Schema(
   },
 );
 
+// -------------------------------------------------------------
+// Enforce one review per user per tour (prevent duplicates)
+// -------------------------------------------------------------
+reviewSchema.index({ tour: 1, user: 1 }, { unique: true });
+
+// -------------------------------------------------------------
+// Populate user info automatically on find queries
+// -------------------------------------------------------------
+reviewSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: 'user',
+    select: 'name photo',
+  });
+  next();
+});
+
+// -------------------------------------------------------------
+// Calculate and update average ratings for a tour
+// -------------------------------------------------------------
 reviewSchema.statics.calcAverageRatings = async function (tourId) {
   const stats = await this.aggregate([
     { $match: { tour: tourId } },
@@ -57,33 +72,35 @@ reviewSchema.statics.calcAverageRatings = async function (tourId) {
     });
   } else {
     await Tour.findByIdAndUpdate(tourId, {
-      ratingsAverage: 4.5,
       ratingsQuantity: 0,
+      ratingsAverage: 4.5, // default fallback
     });
   }
 };
 
-reviewSchema.index({ tour: 1, user: 1 }, { unique: true });
-
-reviewSchema.pre(/^find/, function (next) {
-  this.populate({
-    path: 'user',
-    select: 'name photo',
-  });
-  next();
+// -------------------------------------------------------------
+// Hook: After saving a new review
+// -------------------------------------------------------------
+reviewSchema.post('save', function () {
+  this.constructor.calcAverageRatings(this.tour);
 });
 
+// -------------------------------------------------------------
+// Hook: Before update/delete - get current doc
+// -------------------------------------------------------------
 reviewSchema.pre(/^findOneAnd/, async function (next) {
   this.doc = await this.findOne();
   next();
 });
 
-reviewSchema.post('save', function () {
-  this.constructor.calcAverageRatings(this.tour);
-});
-
+// -------------------------------------------------------------
+// Hook: After update/delete - recalculate rating
+// -------------------------------------------------------------
 reviewSchema.post(/^findOneAnd/, async function () {
-  await this.doc.constructor.calcAverageRatings(this.doc.tour);
+  if (this.doc) {
+    await this.doc.constructor.calcAverageRatings(this.doc.tour);
+  }
 });
 
-module.exports = mongoose.model('Review', reviewSchema);
+const Review = mongoose.model('Review', reviewSchema);
+module.exports = Review;

@@ -13,41 +13,49 @@ function AccountSettingsForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
 
-  const handleUpdate = async (evnt) => {
-    evnt.preventDefault();
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
 
-    console.log("updating user details");
     try {
-      setIsLoading(true);
-
       const formData = new FormData();
       formData.append("name", form.name);
       formData.append("email", form.email);
-      if (form.photo) formData.append("photo", form.photo);
+      if (form.photo) {
+        formData.append("photo", form.photo);
+      }
 
       const {
         data: {
-          data: { user },
+          data: { user: updatedUser },
         },
-      } = await axios.patch(
-        "/api/v2/users/updateMyData",
-        // "http://localhost:5000/api/v2/users/updateMyData",
-        form,
-        {
-          withCredentials: true,
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      } = await axios.patch("/api/v2/users/updateMyData", formData, {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
-      setUser(user);
-      setIsLoading(false);
-      toast.success("Account Details Updated");
+      setUser(updatedUser);
+      toast.success("Account details updated!");
     } catch (err) {
-      console.error(err);
+      console.error("Update error:", err);
       toast.error("Error updating account details");
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setForm((prev) => ({ ...prev, photo: file }));
+    setPreviewUrl(URL.createObjectURL(file));
   };
 
   return (
@@ -60,13 +68,14 @@ function AccountSettingsForm() {
           id="name"
           className="form__input"
           type="text"
-          value={form.name}
-          onChange={(evnt) => setForm({ ...form, name: evnt.target.value })}
-          required
           name="name"
+          value={form.name}
+          onChange={handleInputChange}
           disabled={isLoading}
+          required
         />
       </div>
+
       <div className="form__group ma-bt-md">
         <label className="form__label" htmlFor="email">
           Email address
@@ -75,13 +84,14 @@ function AccountSettingsForm() {
           id="email"
           className="form__input"
           type="email"
-          defaultValue={form.email}
-          onChange={(evnt) => setForm({ ...form, email: evnt.target.value })}
-          required
           name="email"
+          value={form.email}
+          onChange={handleInputChange}
           disabled={isLoading}
+          required
         />
       </div>
+
       <div className="form__group form__photo-upload">
         <img
           className="form__user-photo"
@@ -89,7 +99,7 @@ function AccountSettingsForm() {
             previewUrl ||
             `http://localhost:5000/img/users/${user?.photo || "default.jpg"}`
           }
-          alt={`${user?.name || "User"}'s photo`}
+          alt="User"
         />
         <input
           id="photo"
@@ -98,15 +108,13 @@ function AccountSettingsForm() {
           accept="image/*"
           name="photo"
           disabled={isLoading}
-          onChange={(evnt) => {
-            setForm({ ...form, photo: evnt.target.files[0] });
-            setPreviewUrl(URL.createObjectURL(evnt.target.files[0]));
-          }}
+          onChange={handlePhotoChange}
         />
         <label className="form__label" htmlFor="photo">
           Choose new photo
         </label>
       </div>
+
       <div className="form__group right">
         <button
           className="btn btn--small btn--green"

@@ -1,35 +1,72 @@
 import { Link, useParams } from "react-router-dom";
 import { useNatours } from "../context/ToursContext";
 import OverviewBox from "../components/OverviewBox";
-import { useEffect, useState } from "react";
 import Map from "../components/Map";
 import axios from "axios";
-// import MapTest from "../components/MapTest";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 function Tour() {
   const { slug } = useParams();
   const { tours, user, reviews } = useNatours();
   const [tour, setTour] = useState(null);
+
   useEffect(() => {
-    if (!tours.length || !reviews.length || !slug) return;
+    if (!slug || !tours.length || !reviews.length) return;
 
-    const tour = tours.find((item) => item.slug === slug);
-    const tourReviews = reviews.filter((item) => item.tour === tour.id);
+    const foundTour = tours.find((t) => t.slug === slug);
+    if (!foundTour) return;
 
-    setTour({ ...tour, reviews: tourReviews });
-  }, [reviews, slug, tours]);
+    const relatedReviews = reviews.filter((r) => r.tour === foundTour.id);
+    setTour({ ...foundTour, reviews: relatedReviews });
+  }, [tours, reviews, slug]);
 
   if (!tour) return <p>Loading tour data...</p>;
 
-  const date = new Date(tour.startDates[0]).toLocaleString("en-us", {
+  const date = new Date(tour.startDates[0]).toLocaleString("en-US", {
     month: "long",
     year: "numeric",
   });
   const paragraphs = tour.description.split("\n");
 
   const handleBookTour = async () => {
-    // await axios.post("http://localhost:5000/webhook-checkout");
-    await axios.post("/webhook-checkout");
+    try {
+      await axios.post("/webhook-checkout", null, {
+        withCredentials: true,
+      });
+      toast.success("Booking initiated!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to book tour.");
+    }
+  };
+
+  const ReviewCard = ({ review }) => {
+    return (
+      <div className="reviews__card" key={review.id || review._id}>
+        <div className="reviews__avatar">
+          <img
+            className="reviews__avatar-img"
+            src={`/img/users/${review.user.photo}`}
+            alt={review.user.name}
+          />
+          <h6 className="reviews__user">{review.user.name}</h6>
+        </div>
+        <p className="reviews__text">{review.review}</p>
+        <div className="reviews__rating">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <svg
+              key={star}
+              className={`reviews__star reviews__star--${
+                star <= review.rating ? "active" : "inactive"
+              }`}
+            >
+              <use xlinkHref="/img/icons.svg#icon-star" />
+            </svg>
+          ))}
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -91,44 +128,42 @@ function Tour() {
 
             <div className="overview-box__group">
               <h2 className="heading-secondary ma-bt-lg">Your tour guides</h2>
-              {tour.guides.map((guide) => {
-                const guideRole = guide.role.includes("lead")
-                  ? "lead guide"
-                  : "tour guide";
-                return (
-                  <div
-                    className="overview-box__detail"
-                    key={guide.id || guide.name}
-                  >
-                    <img
-                      className="overview-box__img"
-                      src={`/img/users/${guide.photo}`}
-                      alt={`${guide.name} photo`}
-                    />
-                    <span className="overview-box__label">{guideRole}</span>
-                    <span className="overview-box__text">{guide.name}</span>
-                  </div>
-                );
-              })}
+              {tour.guides.map((guide) => (
+                <div
+                  className="overview-box__detail"
+                  key={guide.id || guide.name}
+                >
+                  <img
+                    className="overview-box__img"
+                    src={`/img/users/${guide.photo}`}
+                    alt={`${guide.name} photo`}
+                  />
+                  <span className="overview-box__label">
+                    {guide.role.includes("lead") ? "Lead guide" : "Tour guide"}
+                  </span>
+                  <span className="overview-box__text">{guide.name}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
+
         <div className="description-box">
           <h2 className="heading-secondary ma-bt-lg">{`About ${tour.name.toLowerCase()} tour`}</h2>
-          {paragraphs.map((paragraph, i) => (
+          {paragraphs.map((text, i) => (
             <p className="description__text" key={i}>
-              {paragraph}
+              {text}
             </p>
           ))}
         </div>
       </section>
 
       <section className="section-pictures">
-        {tour.images.map((image, idx) => (
+        {tour.images.map((img, idx) => (
           <div className="picture-box" key={idx}>
             <img
               className={`picture-box__img picture-box__img--${idx + 1}`}
-              src={`/img/tours/${image}`}
+              src={`/img/tours/${img}`}
               alt={`${tour.name} ${idx + 1}`}
             />
           </div>
@@ -136,41 +171,16 @@ function Tour() {
       </section>
 
       <section className="section-map">
-        {tour.locations.length && <Map locations={tour.locations} />}
+        {Array.isArray(tour.locations) && tour.locations.length > 0 && (
+          <Map locations={tour.locations} />
+        )}
       </section>
 
       <section className="section-reviews">
         <div className="reviews">
-          {tour.reviews.map((review) => {
-            const stars = [1, 2, 3, 4, 5];
-            return (
-              <div className="reviews__card" key={review.id || review._id}>
-                <div className="reviews__avatar">
-                  <img
-                    className="reviews__avatar-img"
-                    src={`/img/users/${review.user.photo}`}
-                    alt={review.user.name}
-                  />
-                  <h6 className="reviews__user">{review.user.name}</h6>
-                </div>
-                <p className="reviews__text">{review.review}</p>
-                <div className="reviews__rating">
-                  {stars.map((star) => {
-                    const activeState =
-                      star <= review.rating ? "active" : "inactive";
-                    return (
-                      <svg
-                        key={star}
-                        className={`reviews__star reviews__star--${activeState}`}
-                      >
-                        <use xlinkHref="/img/icons.svg#icon-star" />
-                      </svg>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
+          {tour.reviews.map((review) => (
+            <ReviewCard key={review._id || review.id} review={review} />
+          ))}
         </div>
       </section>
 
@@ -182,21 +192,19 @@ function Tour() {
           <img
             className="cta__img cta__img--1"
             src={`/img/tours/${tour.images[1]}`}
-            alt="Tour Picture"
+            alt="Tour"
           />
           <img
             className="cta__img cta__img--2"
             src={`/img/tours/${tour.images[2]}`}
-            alt="Tour Picture"
+            alt="Tour"
           />
           <div className="cta__content">
             <h2 className="heading-secondary">What are you waiting for?</h2>
-            <p className="cta__text">{`${tour.duration} days. 1 adventure. Infinite memories. Make it yours today!`}</p>
+            <p className="cta__text">{`${tour.duration} days. 1 adventure. Infinite memories.`}</p>
             {user ? (
               <button
                 className="btn btn--green span-all-rows"
-                id="book-tour"
-                data-tour-id={tour.id}
                 onClick={handleBookTour}
               >
                 Book tour now!

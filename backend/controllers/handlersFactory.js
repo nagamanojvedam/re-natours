@@ -2,37 +2,40 @@ const AppError = require('../utils/appErrors');
 const catchAsync = require('../utils/catchAsync');
 const AppFeatures = require('../utils/apiFeatures');
 
+// GET /api/v1/[resource]?query=params
 exports.getAll = (Model) =>
   catchAsync(async (req, res, next) => {
-    // Filters
+    // For nested GETs like: GET /tours/:tourId/reviews
     const filter = req.params.tourId ? { tour: req.params.tourId } : {};
 
+    // Chain filtering, sorting, field limiting, and pagination
     const features = new AppFeatures(Model.find(filter), req.query)
       .filter()
       .sort()
       .limitFields()
       .paginate();
-    const document = await features.query;
+
+    const documents = await features.query;
 
     res.status(200).json({
       status: 'success',
-      results: document.length,
+      results: documents.length,
       data: {
-        data: document,
+        data: documents,
       },
     });
   });
 
+// GET /api/v1/[resource]/:id
 exports.getOne = (Model) =>
   catchAsync(async (req, res, next) => {
     const { id } = req.params;
 
     const document = await Model.findById(id);
 
-    if (!document)
-      return next(
-        new AppError(404, `Cannot find the document with that ${id}`),
-      );
+    if (!document) {
+      return next(new AppError(404, `No document found with ID: ${id}`));
+    }
 
     res.status(200).json({
       status: 'success',
@@ -42,32 +45,32 @@ exports.getOne = (Model) =>
     });
   });
 
+// POST /api/v1/[resource]
 exports.createOne = (Model) =>
   catchAsync(async (req, res, next) => {
-    const { body: data } = req;
-
-    const document = await Model.create(data);
+    const document = await Model.create(req.body);
 
     res.status(201).json({
       status: 'success',
-      data: { data: document },
+      data: {
+        data: document,
+      },
     });
   });
 
+// PATCH /api/v1/[resource]/:id
 exports.updateOne = (Model) =>
   catchAsync(async (req, res, next) => {
     const { id } = req.params;
-    const { body: data } = req;
 
-    const document = await Model.findByIdAndUpdate(id, data, {
-      new: true,
-      runValidators: true,
+    const document = await Model.findByIdAndUpdate(id, req.body, {
+      new: true, // Return updated document
+      runValidators: true, // Run schema validators
     });
 
-    if (!document)
-      return next(
-        new AppError(404, `Cannot find the document with that ${id}`),
-      );
+    if (!document) {
+      return next(new AppError(404, `No document found with ID: ${id}`));
+    }
 
     res.status(200).json({
       status: 'success',
@@ -77,18 +80,19 @@ exports.updateOne = (Model) =>
     });
   });
 
+// DELETE /api/v1/[resource]/:id
 exports.deleteOne = (Model) =>
   catchAsync(async (req, res, next) => {
     const { id } = req.params;
+
     const document = await Model.findByIdAndDelete(id);
 
-    if (!document)
-      return next(
-        new AppError(404, `Cannot find the document with that ${id}`),
-      );
+    if (!document) {
+      return next(new AppError(404, `No document found with ID: ${id}`));
+    }
 
     res.status(204).json({
       status: 'success',
-      message: 'Tour deleted successfully',
+      message: `${Model.modelName} deleted successfully`,
     });
   });

@@ -1,97 +1,103 @@
-import axios from "axios";
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useNatours } from "../context/ToursContext";
 import { toast } from "react-toastify";
+import axios from "axios";
+import { useNatours } from "../context/ToursContext";
 
 function Login() {
   const navigate = useNavigate();
   const location = useLocation();
-
-  const from = location.state?.from?.pathname || "/";
-
   const { setUser } = useNatours();
-  const [isLoading, setIsLoading] = useState(false);
+
+  const redirectTo = location.state?.from?.pathname || "/";
+
   const [formData, setFormData] = useState({ email: "", password: "" });
-  const { email, password } = formData;
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleChange = (evnt) => {
+    const { name, value } = evnt.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = async (evnt) => {
     evnt.preventDefault();
+
+    setIsLoading(true);
+
     try {
-      setIsLoading(true);
-      const {
-        data: {
-          data: { user },
-        },
-        // } = await axios("http://localhost:5000/api/v2/users/login", {
-      } = await axios("/api/v2/users/login", {
-        method: "POST",
-        data: {
-          email,
-          password,
-        },
+      const response = await axios.post("/api/v2/users/login", formData, {
         withCredentials: true,
       });
 
-      setUser(user);
-      navigate(from, { replace: true });
+      const user = response.data?.data?.user;
 
-      setFormData({ email: "", password: "" });
-      toast.success("Login successful!");
+      if (user) {
+        setUser(user);
+        toast.success("Login successful!");
+        navigate(redirectTo, { replace: true });
+      } else {
+        throw new Error("Unexpected response format");
+      }
     } catch (err) {
-      console.error(err);
-      toast.error(err.response.data.message);
+      console.error("Login error:", err);
+      const errorMsg =
+        err.response?.data?.message || "Login failed. Please try again.";
+      toast.error(errorMsg);
     } finally {
       setIsLoading(false);
     }
   };
+
   return (
     <main className="main">
       <div className="login-form">
         <h2 className="heading-secondary ma-bt-lg">Log into your account</h2>
+
         <form className="form form--login" onSubmit={handleSubmit}>
           <div className="form__group">
-            <label className="form__label" htmlFor="email">
+            <label htmlFor="email" className="form__label">
               Email address
             </label>
             <input
               id="email"
-              className="form__input"
+              name="email"
               type="email"
+              className="form__input"
               placeholder="you@example.com"
+              autoComplete="email"
               required
               disabled={isLoading}
-              value={email}
-              onChange={(evnt) =>
-                setFormData({ ...formData, email: evnt.target.value })
-              }
+              value={formData.email}
+              onChange={handleChange}
             />
           </div>
+
           <div className="form__group ma-bt-md">
-            <label className="form__label" htmlFor="password">
+            <label htmlFor="password" className="form__label">
               Password
             </label>
             <input
               id="password"
-              className="form__input"
+              name="password"
               type="password"
+              className="form__input"
               placeholder="••••••••"
-              required
+              autoComplete="current-password"
               minLength="8"
+              required
               disabled={isLoading}
-              value={password}
-              onChange={(evnt) =>
-                setFormData({ ...formData, password: evnt.target.value })
-              }
+              value={formData.password}
+              onChange={handleChange}
             />
           </div>
+
           <div className="form__group">
             <button
               type="submit"
               className="btn btn--green"
               disabled={isLoading}
             >
-              {isLoading ? "Loading..." : "Login"}
+              {isLoading ? "Logging in..." : "Login"}
             </button>
           </div>
         </form>
