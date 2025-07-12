@@ -13,7 +13,8 @@ function NatoursProvider({ children }) {
       try {
         const {
           data: { user },
-        } = await axios.get("http://localhost:5000/api/v2/users/check", {
+          // } = await axios.get("http://localhost:5000/api/v2/users/check", {
+        } = await axios.get("/api/v2/users/check", {
           withCredentials: true,
         });
         setUser(user);
@@ -31,7 +32,8 @@ function NatoursProvider({ children }) {
         data: {
           data: { data: tours },
         },
-      } = await axios.get(`http://localhost:5000/api/v2/tours`);
+        // } = await axios.get(`http://localhost:5000/api/v2/tours`);
+      } = await axios.get(`/api/v2/tours`);
       setTours(tours);
     };
     const fetchReviews = async () => {
@@ -40,7 +42,8 @@ function NatoursProvider({ children }) {
           data: {
             data: { data: reviews },
           },
-        } = await axios.get("http://localhost:5000/api/v2/reviews");
+          // } = await axios.get("http://localhost:5000/api/v2/reviews");
+        } = await axios.get("/api/v2/reviews");
         setReviews(reviews);
       } catch (err) {
         console.error("Error fetching reviews", err);

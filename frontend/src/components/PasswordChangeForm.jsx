@@ -15,7 +15,8 @@ function PasswordChangeForm() {
     try {
       setIsLoading(true);
       await axios.patch(
-        "http://localhost:5000/api/v2/users/updateMyPassword",
+        // "http://localhost:5000/api/v2/users/updateMyPassword",
+        "/api/v2/users/updateMyPassword",
         passwordForm,
         { withCredentials: true }
       );

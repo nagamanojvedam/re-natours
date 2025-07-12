@@ -22,7 +22,8 @@ function Login() {
         data: {
           data: { user },
         },
-      } = await axios("http://localhost:5000/api/v2/users/login", {
+        // } = await axios("http://localhost:5000/api/v2/users/login", {
+      } = await axios("/api/v2/users/login", {
         method: "POST",
         data: {
           email,

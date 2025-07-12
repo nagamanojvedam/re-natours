@@ -30,7 +30,8 @@ function AccountSettingsForm() {
           data: { user },
         },
       } = await axios.patch(
-        "http://localhost:5000/api/v2/users/updateMyData",
+        "/api/v2/users/updateMyData",
+        // "http://localhost:5000/api/v2/users/updateMyData",
         form,
         {
           withCredentials: true,

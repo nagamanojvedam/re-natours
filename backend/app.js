@@ -9,7 +9,6 @@ const xss = require('xss-clean');
 const hpp = require('hpp');
 const compression = require('compression');
 const dotenv = require('dotenv');
-const path = require('path');
 
 dotenv.config({ path: './config.env' });
 const AppError = require('./utils/appErrors');

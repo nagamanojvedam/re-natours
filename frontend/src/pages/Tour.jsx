@@ -28,7 +28,8 @@ function Tour() {
   const paragraphs = tour.description.split("\n");
 
   const handleBookTour = async () => {
-    await axios.post("http://localhost:5000/webhook-checkout");
+    // await axios.post("http://localhost:5000/webhook-checkout");
+    await axios.post("/webhook-checkout");
   };
 
   return (

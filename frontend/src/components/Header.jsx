@@ -9,7 +9,8 @@ function Header() {
 
   const handleLogout = async () => {
     try {
-      await axios.get("http://localhost:5000/api/v2/users/logout", {
+      // await axios.get("http://localhost:5000/api/v2/users/logout", {
+      await axios.get("/api/v2/users/logout", {
         withCredentials: true,
       });
       setUser(null);

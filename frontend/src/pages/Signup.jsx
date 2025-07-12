@@ -27,7 +27,8 @@ function SignupForm() {
         data: {
           data: { user },
         },
-      } = await axios("http://localhost:5000/api/v2/users/signup", {
+        // } = await axios("http://localhost:5000/api/v2/users/signup", {
+      } = await axios("/api/v2/users/signup", {
         method: "POST",
         data: {
           name,
