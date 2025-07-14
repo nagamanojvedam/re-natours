@@ -1,0 +1,58 @@
+{
+  "name": "re-natours",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "app.js",
+  "scripts": {
+    "start": "node server.js",
+    "server": "nodemon server.js",
+    "prod": "NODE_ENV=production nodemon server.js",
+    "build": "npm i && npm run build:js && npm run start"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.1",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-prettier": "^10.0.2",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^5.2.3",
+    "eslint-plugin-react": "^7.37.4",
+    "nodemon": "^3.1.9",
+    "parcel-bundler": "^1.12.5",
+    "prettier": "^3.5.3"
+  },
+  "dependencies": {
+    "@babel/polyfill": "^7.12.1",
+    "axios": "^1.8.1",
+    "bcryptjs": "^3.0.2",
+    "compression": "^1.8.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-mongo-sanitize": "^2.2.0",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "hpp": "^0.2.3",
+    "html-to-text": "^9.0.5",
+    "jsonwebtoken": "^9.0.2",
+    "maplibre-gl": "^5.2.0",
+    "mongoose": "^8.12.0",
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.10.0",
+    "pug": "^3.0.3",
+    "regenerator-runtime": "^0.14.1",
+    "sharp": "^0.33.5",
+    "slugify": "^1.6.6",
+    "stripe": "^17.7.0",
+    "validator": "^13.12.0",
+    "xss-clean": "^0.1.4"
+  },
+  "engines": {
+    "node": "^22"
+  }
+}
