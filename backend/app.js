@@ -11,6 +11,7 @@ const xss = require('xss-clean');
 const hpp = require('hpp');
 const compression = require('compression');
 const dotenv = require('dotenv');
+const morgan = require('morgan');
 
 // Config
 dotenv.config({ path: './config.env' });
@@ -37,6 +38,11 @@ const app = express();
 // Enable CORS in development
 if (process.env.NODE_ENV !== 'production') {
   app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+}
+
+// Logging
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
 }
 
 // Rate Limiting

@@ -7,6 +7,15 @@ const Tour = require('../models/tourModel');
 const User = require('../models/userModel');
 const AppError = require('../utils/appErrors');
 
+const frontendUrl =
+  process.env.NODE_ENV === 'production'
+    ? 'https://natours.onrender.com'
+    : 'http://localhost:5173';
+
+const endPointSecret =
+  process.env.NODE_ENV === 'production'
+    ? process.env.STRIPE_WEBHOOK_SECRET
+    : process.env.STRIPE_WEBHOOK_SECRET_LOCAL;
 // ---------------------------------------------------
 // Reusable CRUD Operations
 // ---------------------------------------------------
@@ -27,8 +36,8 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
     mode: 'payment',
-    success_url: `${req.protocol}://${req.get('host')}/?tour=${req.params.tourId}&user=${req.user.id}&price=${tour.price}`,
-    cancel_url: `${req.protocol}://${req.get('host')}/tour/${tour.slug}`,
+    success_url: `${frontendUrl}/?tour=${req.params.tourId}&user=${req.user.id}&price=${tour.price}`,
+    cancel_url: `${frontendUrl}/tour/${tour.slug}`,
     customer_email: req.user.email,
     client_reference_id: req.params.tourId,
     line_items: [
@@ -39,9 +48,7 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
           product_data: {
             name: `${tour.name} Tour`,
             description: tour.summary,
-            images: [
-              `${req.protocol}://${req.get('host')}/img/tours/${tour.imageCover}`,
-            ],
+            images: [`${frontendUrl}/img/tours/${tour.imageCover}`],
           },
         },
         quantity: 1,
@@ -83,29 +90,25 @@ const createBookingCheckout = async (session) => {
 
 // Stripe webhook handler (used in server.js as a raw middleware)
 exports.webhookCheckout = (req, res, next) => {
+  console.log('📥 Webhook route hit');
+
   const signature = req.headers['stripe-signature'];
   let event;
 
+  console.log('✅ Stripe Webhook Body:', req.body);
+
   try {
-    event = stripe.webhooks.constructEvent(
-      req.body,
-      signature,
-      process.env.STRIPE_WEBHOOK_SECRET,
-    );
+    event = stripe.webhooks.constructEvent(req.body, signature, endPointSecret);
   } catch (err) {
+    console.log('❌ Stripe Webhook Error:', err.message);
     return res.status(400).send(`Webhook error: ${err.message}`);
   }
 
-  console.log(event);
+  console.log('✅ Stripe Event:', event);
 
-  if (event.type === 'payment_intent.succeeded') {
-    const session = event.data.object;
-    createBookingCheckout(session);
+  if (event.type === 'checkout.session.completed') {
+    createBookingCheckout(event.data.object);
   }
 
-  // if (event.type === 'checkout.session.completed') {
-  //   createBookingCheckout(event.data.object);
-  // }
-
-  res.status(200).json({ received: true });
+  return res.status(200).json({ received: true });
 };
