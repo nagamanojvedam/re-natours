@@ -2,9 +2,8 @@ import { Link, useParams } from "react-router-dom";
 import { useNatours } from "../context/ToursContext";
 import OverviewBox from "../components/OverviewBox";
 import Map from "../components/Map";
-import axios from "axios";
 import { useEffect, useState } from "react";
-import { toast } from "react-toastify";
+import { handleBookTour } from "../utils/stripeBookTour";
 
 function Tour() {
   const { slug } = useParams();
@@ -28,18 +27,6 @@ function Tour() {
     year: "numeric",
   });
   const paragraphs = tour.description.split("\n");
-
-  const handleBookTour = async () => {
-    try {
-      await axios.post("/webhook-checkout", null, {
-        withCredentials: true,
-      });
-      toast.success("Booking initiated!");
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to book tour.");
-    }
-  };
 
   const ReviewCard = ({ review }) => {
     return (
@@ -205,7 +192,7 @@ function Tour() {
             {user ? (
               <button
                 className="btn btn--green span-all-rows"
-                onClick={handleBookTour}
+                onClick={() => handleBookTour(tour._id)}
               >
                 Book tour now!
               </button>
