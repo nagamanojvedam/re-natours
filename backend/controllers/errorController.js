@@ -40,7 +40,7 @@ const sendErrorDev = (err, req, res) => {
   }
 
   // For rendered website
-  return res.status(err.statusCode).render('error', {
+  return res.status(err.statusCode).status({
     title: 'Something went wrong!',
     msg: err.message,
   });
@@ -67,7 +67,7 @@ const sendErrorProd = (err, req, res) => {
 
   // For rendered website
   if (err.isOperationalError) {
-    return res.status(err.statusCode).render('error', {
+    return res.status(err.statusCode).json({
       title: 'Something went wrong!',
       msg: err.message,
     });
@@ -75,7 +75,7 @@ const sendErrorProd = (err, req, res) => {
 
   // Programming/unknown error
   console.error('ERROR 💥', err);
-  return res.status(err.statusCode).render('error', {
+  return res.status(err.statusCode).json({
     title: 'Something went wrong!',
     msg: 'Please try again later.',
   });
