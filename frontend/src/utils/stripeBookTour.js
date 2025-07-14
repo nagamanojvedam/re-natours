@@ -23,7 +23,6 @@ const handleBookTour = async (tourId) => {
     });
   } catch (err) {
     console.error(err);
-    toast.error("Booking failed. Please try again.");
   }
 };
 

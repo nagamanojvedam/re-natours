@@ -1,8 +1,24 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useNatours } from "../context/ToursContext";
+import { useEffect } from "react";
+import { toast } from "react-toastify";
 
 function Overview() {
   const { tours } = useNatours();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const status = searchParams.get("status");
+    if (status === "success") {
+      toast.success("Booking successful!");
+      navigate("/", { replace: true });
+    }
+    if (status === "cancelled") {
+      toast.error("Booking cancelled!");
+      navigate("/", { replace: true });
+    }
+  }, [searchParams, navigate]);
 
   if (!tours || tours.length === 0) return <p>No tours at this moment.</p>;
 

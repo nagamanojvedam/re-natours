@@ -1,3 +1,4 @@
+// const stripe = require('stripe')(process.env.STRIPE_SK);
 const stripe = require('stripe')(process.env.STRIPE_SK);
 const catchAsync = require('../utils/catchAsync');
 const handlersFactory = require('./handlersFactory');
@@ -16,6 +17,7 @@ const endPointSecret =
   process.env.NODE_ENV === 'production'
     ? process.env.STRIPE_WEBHOOK_SECRET
     : process.env.STRIPE_WEBHOOK_SECRET_LOCAL;
+
 // ---------------------------------------------------
 // Reusable CRUD Operations
 // ---------------------------------------------------
@@ -36,8 +38,8 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
     mode: 'payment',
-    success_url: `${frontendUrl}/?tour=${req.params.tourId}&user=${req.user.id}&price=${tour.price}`,
-    cancel_url: `${frontendUrl}/tour/${tour.slug}`,
+    success_url: `${frontendUrl}/?status=success`,
+    cancel_url: `${frontendUrl}/?status=cancelled`,
     customer_email: req.user.email,
     client_reference_id: req.params.tourId,
     line_items: [
@@ -56,7 +58,7 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
     ],
   });
 
-  res.status(200).json({
+  return res.status(200).json({
     status: 'success',
     session,
   });
@@ -90,12 +92,8 @@ const createBookingCheckout = async (session) => {
 
 // Stripe webhook handler (used in server.js as a raw middleware)
 exports.webhookCheckout = (req, res, next) => {
-  console.log('📥 Webhook route hit');
-
   const signature = req.headers['stripe-signature'];
   let event;
-
-  console.log('✅ Stripe Webhook Body:', req.body);
 
   try {
     event = stripe.webhooks.constructEvent(req.body, signature, endPointSecret);
@@ -103,8 +101,6 @@ exports.webhookCheckout = (req, res, next) => {
     console.log('❌ Stripe Webhook Error:', err.message);
     return res.status(400).send(`Webhook error: ${err.message}`);
   }
-
-  console.log('✅ Stripe Event:', event);
 
   if (event.type === 'checkout.session.completed') {
     createBookingCheckout(event.data.object);
