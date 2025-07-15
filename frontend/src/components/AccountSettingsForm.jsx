@@ -95,10 +95,7 @@ function AccountSettingsForm() {
       <div className="form__group form__photo-upload">
         <img
           className="form__user-photo"
-          src={
-            previewUrl ||
-            `http://localhost:5000/img/users/${user?.photo || "default.jpg"}`
-          }
+          src={previewUrl || `/img/users/${user?.photo || "default.jpg"}`}
           alt="User"
         />
         <input
