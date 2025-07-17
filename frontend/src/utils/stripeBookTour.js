@@ -1,8 +1,10 @@
 import axios from "axios";
 import { loadStripe } from "@stripe/stripe-js";
-import { toast } from "react-toastify";
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PK);
+// const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PK);
+const stripePromise = axios
+  .get("/config/stripe")
+  .then((res) => loadStripe(res.data.publicKey));
 
 const handleBookTour = async (tourId) => {
   try {
@@ -14,8 +16,6 @@ const handleBookTour = async (tourId) => {
     } = await axios(`/api/v2/bookings/checkout-session/${tourId}`, {
       withCredentials: true,
     });
-
-    console.log(session);
 
     // ✅ Redirect to Stripe Checkout
     await stripe.redirectToCheckout({

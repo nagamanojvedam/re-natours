@@ -14,7 +14,7 @@ const dotenv = require('dotenv');
 const morgan = require('morgan');
 
 // Config
-dotenv.config({ path: './config.env' });
+dotenv.config();
 
 // Utils & Controllers
 const AppError = require('./utils/appErrors');
