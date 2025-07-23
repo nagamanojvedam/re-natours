@@ -9,7 +9,7 @@ const User = require('../models/userModel');
 
 const frontendUrl =
   process.env.NODE_ENV === 'production'
-    ? 'https://natours.onrender.com'
+    ? 'https://re-natours.onrender.com'
     : 'http://localhost:5173';
 
 // ----------------------------------------

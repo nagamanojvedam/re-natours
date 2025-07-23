@@ -10,7 +10,7 @@ const AppError = require('../utils/appErrors');
 
 const frontendUrl =
   process.env.NODE_ENV === 'production'
-    ? 'https://natours.onrender.com'
+    ? 'https://re-natours.onrender.com'
     : 'http://localhost:5173';
 
 const endPointSecret =
