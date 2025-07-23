@@ -4,8 +4,13 @@ const jwt = require('jsonwebtoken');
 
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appErrors');
-// const Email = require('../utils/email'); // Optional for production
+const Email = require('../utils/email'); // Optional for production
 const User = require('../models/userModel');
+
+const frontendUrl =
+  process.env.NODE_ENV === 'production'
+    ? 'https://natours.onrender.com'
+    : 'http://localhost:5173';
 
 // ----------------------------------------
 // Utility: Sign JWT Token
@@ -43,8 +48,9 @@ const createSendToken = (user, statusCode, req, res) => {
 // ----------------------------------------
 exports.signup = catchAsync(async (req, res, next) => {
   const newUser = await User.create(req.body);
-  const url = `${req.protocol}://${req.get('host')}/me`;
-  // await new Email(newUser, url).sendWelcome();
+  const url = `${frontendUrl}/me`;
+
+  await new Email(newUser, url).sendWelcome();
   createSendToken(newUser, 201, req, res);
 });
 
@@ -91,8 +97,8 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   await user.save({ validateBeforeSave: false });
 
   try {
-    const resetURL = `${req.protocol}://${req.get('host')}/api/v2/users/resetPassword/${resetToken}`;
-    // await new Email(user, resetURL).sendPasswordReset();
+    const resetURL = `${frontendUrl}/reset-password/${resetToken}`;
+    await new Email(user, resetURL).sendPasswordReset();
 
     res.status(200).json({
       status: 'success',

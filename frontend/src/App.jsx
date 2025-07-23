@@ -15,6 +15,8 @@ const Tour = lazy(() => import("./pages/Tour"));
 const Overview = lazy(() => import("./pages/Overview"));
 const Error = lazy(() => import("./pages/Error"));
 const Bookings = lazy(() => import("./pages/Bookings"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 
 axios.defaults.baseURL =
   import.meta.env.MODE === "development" ? "http://localhost:5000" : "/";
@@ -29,6 +31,8 @@ function App() {
         <Route element={<Layout />}>
           <Route index element={<Overview />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/tour/:slug" element={<Tour />} />
 

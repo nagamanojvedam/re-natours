@@ -1,6 +1,8 @@
 const nodemailer = require('nodemailer');
 const pug = require('pug');
 const htmlToText = require('html-to-text');
+const path = require('path');
+const fs = require('fs');
 
 class Email {
   constructor(user, url) {
@@ -16,11 +18,11 @@ class Email {
    */
   createTransport() {
     return nodemailer.createTransport({
-      host: 'sandbox.smtp.mailtrap.io',
-      port: 2525,
+      host: process.env.EMAIL_HOST,
+      port: process.env.EMAIL_PORT,
       auth: {
-        user: 'ac43acf9ed9ba3', // Replace with env variable in production
-        pass: '864714206b4cf4', // Replace with env variable in production
+        user: process.env.EMAIL_USERNAME, // Replace with env variable in production
+        pass: process.env.EMAIL_PASSWORD, // Replace with env variable in production
       },
     });
   }
@@ -31,14 +33,11 @@ class Email {
    * - Converts HTML to plain text for email clients that don't support HTML
    */
   async send(templateName, subject) {
-    const html = pug.renderFile(
-      `${__dirname}/../views/emails/${templateName}.pug`,
-      {
-        firstName: this.firstName,
-        url: this.url,
-        subject,
-      },
-    );
+    const templatePath = path.join(__dirname, `../views/${templateName}.html`);
+    const html = fs
+      .readFileSync(templatePath, 'utf-8')
+      .replace(/{{username}}/g, this.firstName)
+      .replace(/{{resetLink}}/g, this.url);
 
     const mailOptions = {
       from: this.from,
@@ -63,7 +62,7 @@ class Email {
    */
   async sendPasswordReset() {
     await this.send(
-      'passwordReset',
+      'resetPassword',
       'Your password reset token (valid for only 10 minutes)',
     );
   }

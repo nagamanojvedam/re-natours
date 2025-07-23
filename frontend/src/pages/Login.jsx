@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { useNatours } from "../context/ToursContext";
@@ -91,7 +91,7 @@ function Login() {
             />
           </div>
 
-          <div className="form__group">
+          <div className="form__group forgot-password">
             <button
               type="submit"
               className="btn btn--green"
@@ -99,6 +99,7 @@ function Login() {
             >
               {isLoading ? "Logging in..." : "Login"}
             </button>
+            <Link to="/forgot-password">Forgot Password?</Link>
           </div>
         </form>
       </div>

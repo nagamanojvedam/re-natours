@@ -1400,3 +1400,19 @@ body {
   color: #856404 !important;
   border-left: 4px solid #856404;
 }
+
+.forgot-password {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.4rem;
+}
+
+.forgot-password a {
+  color: #999;
+  text-decoration: none;
+}
+
+.forgot-password a:hover {
+  color: #55c57a;
+}
