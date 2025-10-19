@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "corepack enable && pnpm install --prefix backend && pnpm install --prefix frontend && pnpm run build --prefix frontend",
-    "start": "pnpm run start --prefix backend"
+    "build": "pnpm install --prefix backend && pnpm install --prefix frontend && pnpm --prefix frontend run build",
+    "start": "pnpm --prefix backend run start"
   },
   "repository": {
     "type": "git",
